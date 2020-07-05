@@ -14,6 +14,10 @@ const markup = [
   [/\x0En\x01\x00/gs, '{name}'],
   [/\x0En\x00\x00/gs, '...'],
   [/\x0En\b\x00/gs, '{island}'],
+  [/\x0En\b\x00/gs, '{island}'],
+  [/\x0Es\x01\x02\x00Í/gs, '{someone}'],
+
+  [/\x0En.\x00/gs, '{something}'],
 
   [/\x0E\x00\x03\x02\x01\x00/gs, '{blue}'],
   [/\x0E\x00\x03\x02ÿÿ/gs, '{/blue}'],
@@ -22,7 +26,11 @@ const markup = [
 
   ['\x0EZ\x03\x02\x00\x00', '{unknown}'],
   ['\x0E2\x15\x02\x00Í', '{unknown}'],
+  ['\x0E2\x03\x00\x0En\x03\x00', '{unknown}'],
+  ['\x0E}\x06\x02\x01', '{unknown}'],
   ['\x0E(&\x04\x01Í\x00\x00', '{button}'],
+  ['\x0E}\x06\x02\x01Í', '{something}'],
+  ['\x0E}\x00\x02\x00\x00', '{something}'],
 
   [/\x0E\(.\x04...\x00/gs, '{unknown_28}'],   // expression?
 
@@ -62,7 +70,7 @@ const parseEntry = (entry) => {
     filtered = filtered.replace(conversion[0], conversion[1])
   }
 
- if (true || name == '008_02') { 
+ if (filtered.match(/\x0E/)) {
     console.log(name)
     //console.log([original])
     console.log([filtered])
