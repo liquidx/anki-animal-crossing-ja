@@ -1,0 +1,9 @@
+{
+  "name": "anki-animal-crossing-jp",
+  "version": "1.0.0",
+  "description": "",
+  "dependencies": {
+    "walk": "^2.3.14",
+    "xml2js": "^0.4.23"
+  }
+}
