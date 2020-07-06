@@ -13,7 +13,7 @@ const ja_f = './acnh1.1msgjp/TalkSNpc_JPja/rco/SP_rco_01_StartingMaingame.msbt.k
 const markup = [
   [/\x0En\x01\x00/gs, '{name}'],
   [/\x0En\x00\x00/gs, '...'],
-  [/\x0En[^\x01\x02]\x00/gs, '{island}'],
+  [/\x0En[^\x01\x02]\x00/gs, '{name}'],
   [/\x0En\x03\x00/gs, '{markup_n}'],
   [/\x0En\x07\x02\x01Í/gs, '{fruit}'],
   [/\x0En\x07\x02\x00Í/gs, '{fruit}'],
@@ -31,7 +31,7 @@ const markup = [
 
   [/\x0Es\x00\x02[\x00\x01\x02]Í/gs, '{something}'],
   [/\x0Es\x01\x02\x00Í/gs, '{name}'],
-  [/\x0Es\x02\x02\x00Í/gs, '{island}'],
+  [/\x0Es\x02\x02\x00Í/gs, '{name}'],
   [/\x0Es\x03\x02[\x00\x01]Í/gs, '{something}'],
   [/\x0Es\x05\x02\x00Í/gs, '{something}'],
   [/\x0Es\x07\x02\x00Í/gs, '{something}'],
