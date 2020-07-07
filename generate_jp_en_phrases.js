@@ -4,11 +4,9 @@ const xml2js = require('xml2js')
 const fs = require('fs')
 const walk = require('walk')
 const path = require('path')
+const csv = require('@fast-csv/format');
 
-const en_f = './acnh1.1msgen/TalkSNpc_USen/rco/SP_rco_01_StartingMaingame.msbt.kup'
-//const ja_f = './acnh1.1msgjp/TalkSNpc_JPja/rcm/SP_rcm_01_TentCommon.msbt.kup'
-const ja_f = './acnh1.1msgjp/TalkSNpc_JPja/rco/SP_rco_01_StartingMaingame.msbt.kup'
-
+const REMOVE_MARKUP = true
 
 const markup = [
   [/\x0En\x01\x00/gs, '{name}'],
@@ -171,16 +169,16 @@ const markup = [
   [/\x0Es\x01\x02\x01Í/gs, '{someone1}'],
   [/\x0Es\x00\x02\x00Í/gs, '{someone0}'],
 
-  [/\x0EZ\x03\x02\x00\x00/gs, '{unknown}'],
+  [/\x0EZ\x03\x02\x00\x00/gs, '{markup_z}'],
 
   //[/\x0E}\x00\x02.\x00/gs, '{something}'],
 
   // expressions?
-  [/\x0E\(.\x04...\x00/gs, '{unknown_28}'], 
+  [/\x0E\(.\x04...\x00/gs, '{markup28}'], 
   [/\x0E\(\"\x08\x04Í\x04\x00N\x001\x00/gs, '{markup28}'],
   [/\x0E\(\"\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}'],
   [/\x0E\(\x00\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}' ],
-  [/\x0E\(\x02\x08\x04Í\x04\x00N\x001\x00/gs, '{unknown_28}'],
+  [/\x0E\(\x02\x08\x04Í\x04\x00N\x001\x00/gs, '{markup28}'],
   [/\x0E\(\x02\x06\x00Í\x02\x000\x00/gs, '{markup28}'],
   [/\x0E\(\x02\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}'],
   [/\x0E\(\x02\x08\x00Í\x04\x00µ0Ö0/gs, '{markup28}'],
@@ -224,7 +222,7 @@ const markup = [
 
   [/\x0E\x8C\x09\x02\x00Í\x0F\n\x05/gs, '{markup}'],
 
-  [/\x0E\x87\x05\x02\x00Í/gs, '{unknown_0x87}'],
+  [/\x0E\x87\x05\x02\x00Í/gs, '{markupx87}'],
   [/\x0E\x87\x07\x02[\x00\x05\x06\x07\x08]Í/gs, '{something}'],
   [/\x0E\x87\x07\x02\x02Í/gs, '{something}'],
   [/\x0E\x87\x03\x02[\x01\x02\x03\x04\x05\x06]Í/gs, '{something}'],
@@ -276,15 +274,22 @@ const parseEntry = (entry) => {
   let filtered = unescapeHtmlEntities(original)
   filtered = removeFuriganaMarkup(filtered)
   for (let conversion of markup) {
-    filtered = filtered.replace(conversion[0], conversion[1])
+    if (REMOVE_MARKUP && conversion[1].startsWith('{markup')) {
+      filtered = filtered.replace(conversion[0], '')
+    } else {
+      filtered = filtered.replace(conversion[0], conversion[1])
+    }
   }
 
- if (filtered.match(/\x0E/) ||
-      filtered.match(/\x0F/)) {
-    console.log(name)
-    //console.log([original])
-    console.log([filtered])
+  if (filtered.match(/\x0E/)) {
+    return null
   }
+//  if (filtered.match(/\x0E/) ||
+//       filtered.match(/\x0F/)) {
+//     console.log(name)
+//     console.log([filtered])
+//   }
+
   return {
     name: name,
     text: filtered
@@ -297,19 +302,26 @@ const parser = new xml2js.Parser({
   normalizeTags: true,
 });
 
-const parseFile = (filename, callback) => {
-  fs.readFile(filename, function(err, data) {
+const parseFile = async (filename) => {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filename, function(err, data) {
       parser.parseString(data, function (err, result) {
         if (err) {
           console.error(err)
+          reject(err)
           return
         }
         let entries = []
         for (let entry of result.kup.entries[0].entry) {
-          entries.push(parseEntry(entry))
+          const parsedEntry = parseEntry(entry)
+          if (parsedEntry) {
+            entries[parsedEntry.name] = parsedEntry.text
+          }
         }
-      });
-  });
+        resolve(entries)
+      })
+    })
+  })
 }
 
 const en_path = 'acnh1.1msgen'
@@ -328,7 +340,11 @@ const crawlPaths = (callback) => {
       let jaPath = enToJaPath(enPath)
       fs.stat(jaPath, (err, stats) => {
         if (stats && stats.isFile()) {
-          pairs.push({en: enPath, ja: jaPath})
+          const domain = enPath
+            .replace(`${en_path}${path.sep}`, '')
+            .replace('.msbt.kup', '')
+            .replace(new RegExp(`\\${path.sep}`, 'g'), '.')
+          pairs.push({en: enPath, ja: jaPath, domain: domain})
         }
         next()
       })
@@ -337,15 +353,47 @@ const crawlPaths = (callback) => {
     }
   })
   walker.on('end', () => {
-    console.log(pairs.length)
+    //console.log(pairs.length)
     callback(pairs)
   })
 }
 
 crawlPaths((files) => {
-  for (let filePair of files) {
-    parseFile(filePair.en, (entries) => {
+  let tasks = []
 
-    })
+  for (let filePair of files) {
+    let parseTask = Promise.all([parseFile(filePair.en), parseFile(filePair.ja)])
+      .then((enJaEntries) => {
+        let msgPairs = []
+        enEntries = enJaEntries[0]
+        jaEntries = enJaEntries[1]
+
+        // Match entries
+        for (let enEntryKey of Object.keys(enEntries)) {
+          if (jaEntries[enEntryKey]) {
+            const msgId = `${filePair.domain}.${enEntryKey}`
+            msgPairs.push({
+              msgId: msgId,
+              en: enEntries[enEntryKey],
+              ja: jaEntries[enEntryKey]
+            })
+          }
+        }
+        return msgPairs
+      })
+    tasks.push(parseTask)
   }
+
+  Promise.all(tasks)
+    .then(messagesList => {
+      const stream = csv.format({ headers: true })
+      const ws = fs.createWriteStream('output.csv')
+      stream.pipe(ws)
+      for (let messages of messagesList) {
+        for (let message of messages) {
+          stream.write(message)
+        }
+        //console.log(messages)
+      }
+    })
 })
