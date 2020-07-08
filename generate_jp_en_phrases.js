@@ -37,10 +37,10 @@ const markup = [
   [/\x0Es\x06\x02\x00Í/gs, '{name}'],
   [/\x0Es\x08\x02\x00Í/gs, '{name}'],
 
-  [/\x0E\x00\x03\x02\x00\x00/gs, '{blue}'],
-  [/\x0E\x00\x03\x02\x01\x00/gs, '{blue}'],
-  [/\x0E\x00\x03\x02\x03\x00/gs, '{blue}'],
-  [/\x0E\x00\x03\x02ÿÿ/gs, '{/blue}'],
+  [/\x0E\x00\x03\x02[\x00\x01\x02]\x00/gs, '{color}'],
+  [/\x0E\x00\x03\x02\x03\x00/gs, '{color}'],  
+  [/\x0E\x00\x03\x02\x04\x00/gs, '{/color}'],
+  [/\x0E\x00\x03\x02ÿÿ/gs, '{/color}'],
   [/\x0E\x00\x04\x00/gs, '{newpage}'],  
   [/\x0E\x00\x00\x04\x00\x00\x00/gs, '{markup00}'],
   [/\x0E\x00\x00\x04\x00\x00\x00\x0E\x00\(\x00\$\x00\x04\x00촀\x00/gs, '{markup00}'],
@@ -109,7 +109,9 @@ const markup = [
 
   // unknown patterns
 
-  [/\x0E\x00\x02\x02d\x00\x0Fd\x04/gs, '{markup00}'],
+  [/\x0E\x00\x02\x02K\x00/gs, '{small}'],
+  [/\x0E\x00\x02\x02\x96\x00/gs, '{small}'],
+  [/\x0E\x00\x02\x02d\x00/gs, '{/small}'],
   [/\x0E\x00\x02\x02.[\x00\x01]/gs, '{markup00}'],
   [/\x0E\x00\x00\b\x04\x00d0K0/gs, '{object}'],
   [/\x0E\x00\x00\x00\x04\x00\x00/gs, '{markup00}'],
@@ -157,7 +159,8 @@ const markup = [
   [/\x0E2\x08\$\x00\x02\n\x00y\x00e\x00a\x00r\x00s\x00\x08\x00y\x00e\x00a\x00r\x00\n\x00y\x00e\x00a\x00r\x00s\x00/gsi, '{year_years}'],
   [/\x0E2\x086\x00\x01\f\x00m\x00o\x00n\x00t\x00h\x00s\x00\x16\x00w\x00h\x00o\x00l\x00e\x00 \x00m\x00o\x00n\x00t\x00h\x00\f\x00m\x00o\x00n\x00t\x00h\x00s\x00/gsi, '{month_months}'],
   [/\x0E2\x086\x00\x00\x10\x00p\x00u\x00s\x00h\x00-\x00u\x00p\x00s\x00\x0E\x00p\x00u\x00s\x00h\x00\-\x00u\x00p\x00\x10\x00p\x00u\x00s\x00h\x00\-\x00u\x00p\x00s\x00/gsi, '{pushup_pushups}'],
-  [/\x0E2\x03\x00/gs, '{someone3}'],
+
+  [/\x0E2\x03\x00/gs, '{markup3}'],
   [/\x0E2\x00\x04\x00.\x00Í/gs, '{markup50}'],
   [/\x0E2\x00\x04\x00.\x03Í/gs, '{markup50}'],
   [/\x0E2\x00\x04\x05\x04\x03Í/gs, '{markup50}'],
@@ -200,7 +203,7 @@ const markup = [
   [/\x0E\n\x00\x00\x02\x00\(\x00\n\x00/gsi, '{markup10_2_2}'],
   [/\x0E\n\x02.?[\x00]+\n\x00/gs, '{markup10_3_l}'],
   [/\x0E\n\x02.?[\x00]+/gs, '{markup10_3}'],
-  [/\x0E\n\f\x00[I]?/gs, '{markup10_4}'],
+  [/\x0E\n\f\x00/gs, '{markup10_4}'],
   [/\x0E\n\n\x00/gs, '{markup10_5}'],
   [/\x0E\n\x09\x00/gs, '{markup10_6}'],
   [/\x0E\n\x08\x04[\<]\x00\x00\x00/gs, '{markup10_7}'],
@@ -267,7 +270,7 @@ const removeFuriganaMarkup = (text) => {
   return filtered
 }
 
-const parseEntry = (entry) => {
+const parseEntry = (entry, domain) => {
   let name = entry.$.NAME
   let original = entry.original[0]
 
@@ -283,6 +286,13 @@ const parseEntry = (entry) => {
 
   if (filtered.match(/\x0E/)) {
     return null
+  }
+
+  if (domain == 'TalkSNpc.sza.SP_sza_50_IslandEvaluation' && name == '003_04') {
+  // if (name == 'Fish_00329') {
+    console.log(name)
+    console.log([unescapeHtmlEntities(original)])
+    console.log([filtered])
   }
 //  if (filtered.match(/\x0E/) ||
 //       filtered.match(/\x0F/)) {
@@ -302,7 +312,7 @@ const parser = new xml2js.Parser({
   normalizeTags: true,
 });
 
-const parseFile = async (filename) => {
+const parseFile = async (filename, domain) => {
   return new Promise((resolve, reject) => {
     fs.readFile(filename, function(err, data) {
       parser.parseString(data, function (err, result) {
@@ -313,7 +323,7 @@ const parseFile = async (filename) => {
         }
         let entries = []
         for (let entry of result.kup.entries[0].entry) {
-          const parsedEntry = parseEntry(entry)
+          const parsedEntry = parseEntry(entry, domain)
           if (parsedEntry) {
             entries[parsedEntry.name] = parsedEntry.text
           }
@@ -324,27 +334,44 @@ const parseFile = async (filename) => {
   })
 }
 
-const en_path = 'acnh1.1msgen'
-const ja_path = 'acnh1.1msgjp'
+const enStringsDir = 'acnh1.1msgen'
+const jaStringsDir = 'acnh1.1msgjp'
+const enCode = 'USen'
+const jaCode = 'JPja'
 const pairs = []
 
 const enToJaPath = (enPath) => {
-  return enPath.replace(en_path, ja_path).replace('USen', 'JPja')
+  return enPath.replace(enStringsDir, jaStringsDir).replace(enCode, jaCode)
+}
+
+const jaToEnPath = (enPath) => {
+  return enPath.replace(jaStringsDir, enStringsDir).replace(jaCode, enCode)
 }
 
 const crawlPaths = (callback) => {
-  const walker =  walk.walk(en_path)
+  const sourceDir = enStringsDir
+  const sourceCode = enCode
+  const pathConvert = enToJaPath
+
+  // const sourceDir = jaStringsDir
+  // const sourceCode = jaCode
+  // const pathConvert = jaToEnPath
+
+  const walker =  walk.walk(sourceDir)
   walker.on('file', (root, stats, next) => {
     if (stats.name.endsWith('.kup')) {
-      let enPath = path.join(root, stats.name)
-      let jaPath = enToJaPath(enPath)
-      fs.stat(jaPath, (err, stats) => {
+      let sourcePath = path.join(root, stats.name)
+      let destPath = pathConvert(sourcePath)
+      fs.stat(destPath, (err, stats) => {
         if (stats && stats.isFile()) {
-          const domain = enPath
-            .replace(`${en_path}${path.sep}`, '')
+          const domain = sourcePath
+            .replace(`${sourceDir}${path.sep}`, '')
+            .replace(`_${sourceCode}`, '')
             .replace('.msbt.kup', '')
-            .replace(new RegExp(`\\${path.sep}`, 'g'), '.')
-          pairs.push({en: enPath, ja: jaPath, domain: domain})
+            .replace(/\//g, '.')
+          pairs.push({en: sourcePath, ja: destPath, domain: domain})
+        } else {
+          console.log(`Unable to find ${destPath}`)
         }
         next()
       })
@@ -353,7 +380,7 @@ const crawlPaths = (callback) => {
     }
   })
   walker.on('end', () => {
-    //console.log(pairs.length)
+    console.log(pairs.length)
     callback(pairs)
   })
 }
@@ -362,7 +389,7 @@ crawlPaths((files) => {
   let tasks = []
 
   for (let filePair of files) {
-    let parseTask = Promise.all([parseFile(filePair.en), parseFile(filePair.ja)])
+    let parseTask = Promise.all([parseFile(filePair.en, filePair.domain), parseFile(filePair.ja, filePair.domain)])
       .then((enJaEntries) => {
         let msgPairs = []
         enEntries = enJaEntries[0]
@@ -389,11 +416,27 @@ crawlPaths((files) => {
       const stream = csv.format({ headers: true })
       const ws = fs.createWriteStream('output.csv')
       stream.pipe(ws)
+
+      let seenEn = new Set()
+      let seenJa = new Set()
+      let duplicateCount = 0
+      let messageCount = 0
       for (let messages of messagesList) {
         for (let message of messages) {
+          if (seenEn.has(message.en)) {
+            duplicateCount++
+            continue
+          }
+          if (seenJa.has(message.ja)) {
+            duplicateCount++
+            continue
+          }
+          seenEn.add(message.en)
+          seenJa.add(message.ja)
           stream.write(message)
+          messageCount++
         }
-        //console.log(messages)
       }
+      console.log(`Total messages ${messageCount} (duplicates: ${duplicateCount})`)
     })
 })
