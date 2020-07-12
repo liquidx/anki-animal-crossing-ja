@@ -1,0 +1,115 @@
+@import '../node_modules/normalize.css/normalize.css';
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: rgb(250, 250, 250);
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  margin: 0;
+  padding: 0;
+}
+
+
+#page {
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  flex-wrap: nowrap;
+  margin-bottom: 50px;
+}
+
+
+h1 {
+  font-size: 0.9rem;
+  padding: 0;
+  margin: 0 1rem;
+  color: rgb(250, 250, 250);
+}
+
+a.action {
+  font-size: 0.8rem;
+  display: block;
+  text-decoration: none;
+  color: rgb(250, 250, 250);
+  background-color: rgb(64, 64, 64);
+  border-radius: 0.7rem;
+  padding: 0.2rem 0.8rem;
+  margin: 0 0.5rem;
+
+  &:hover {
+    background-color: rgb(128, 128, 128);
+  }
+
+  &.active {
+    color: red;
+  }
+}
+
+
+input[type=text] {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgb(211, 211, 211);
+  width: auto;
+}
+
+
+
+header {
+  flex-grow: 0;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  flex-wrap: nowrap;
+
+  height: 3rem;
+  padding: 0.5rem;
+  background: rgb(37, 37, 37);
+  color: rgb(250, 250, 250);
+  font-size: 0.8rem;
+}
+
+
+#results {
+  flex-basis: 8rem;
+  flex-grow: 999;
+
+  padding: 20px;
+  table#messages {
+    thead th {
+      font-weight: bold;
+      text-align: left;
+      padding: 0.5rem 0.5rem;
+      background-color: #eee;
+    }
+
+    td {
+      font-size: 13px;
+      padding: 0.5rem;
+      min-width: 100px;
+    }
+
+    .filter-field {
+      max-width: 100px;
+    }
+
+    .filter {
+      min-width: 40px;
+      width: 40px;
+    }
+  }
+
+  .hide { display: none; }
+
+  .hide-patientId { .patientId { display: none; } }
+  .hide-dateAnnounced { .dateAnnounced { display: none; } }
+  .hide-dateAdded { .dateAdded { display: none; } }
+  .hide-age { .age { display: none; } }
+  .hide-gender { .gender { display: none; } }
+}

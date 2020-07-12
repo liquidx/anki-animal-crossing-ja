@@ -4,3 +4,5 @@ node_modules
 public/*
 firebase-debug.log
 .firebase/*
+
+screenshots/

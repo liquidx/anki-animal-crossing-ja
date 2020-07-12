@@ -20,11 +20,13 @@
   "dependencies": {
     "@babel/core": "^7.7.7",
     "@google-cloud/storage": "^4.2.0",
+    "copy-webpack-plugin": "^6.0.3",
     "express": "^4.17.1",
+    "fast-csv": "^4.3.1",
     "firebase": "^7.6.1",
     "lodash": "^4.17.11",
     "normalize.css": "^8.0.1",
-    "fast-csv": "^4.3.1",
+    "papaparse": "^5.2.0",
     "walk": "^2.3.14",
     "xml2js": "^0.4.23"
   },
