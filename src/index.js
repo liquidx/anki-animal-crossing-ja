@@ -106,7 +106,16 @@ const renderTable = () => {
       continue
     }
     if (pattern) {
-      if (!message.en.match(pattern) && !message.ja.match(pattern) && !message.msgId.match(pattern)) {
+      let hasMatch = false
+      for (let msg of message.en) {
+        hasMatch = hasMatch || !!msg.match(pattern)
+      }
+      for (let msg of message.ja) {
+        hasMatch = hasMatch || !!msg.match(pattern)
+      }
+      hasMatch = hasMatch || !!message.msgId.match(pattern)
+
+      if (!hasMatch) {
         continue
       }
     }
