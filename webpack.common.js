@@ -21,7 +21,6 @@ module.exports = {
   },
 
   plugins: [
-    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: 'Index',
       filename: 'index.html',
@@ -33,6 +32,9 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [{from: "data/**", to: ".", flatten: false }]
+    }),
+    new CopyPlugin({
+      patterns: [{from: "screenshots/**", to: ".", flatten: false }]
     }),
   ],
   module: {

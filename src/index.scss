@@ -93,6 +93,12 @@ header {
       font-size: 13px;
       padding: 0.5rem;
       min-width: 100px;
+      vertical-align: top;
+
+      .markup {
+        margin-top: 1rem;
+        color: #999;
+      }
     }
 
     .filter-field {
@@ -104,12 +110,4 @@ header {
       width: 40px;
     }
   }
-
-  .hide { display: none; }
-
-  .hide-patientId { .patientId { display: none; } }
-  .hide-dateAnnounced { .dateAnnounced { display: none; } }
-  .hide-dateAdded { .dateAdded { display: none; } }
-  .hide-age { .age { display: none; } }
-  .hide-gender { .gender { display: none; } }
 }

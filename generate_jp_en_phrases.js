@@ -177,22 +177,23 @@ const CONVERSION_RULES = [
   //[/\x0E}\x00\x02.\x00/gs, '{something}'],
 
   // expressions?
-  [/\x0E\(.\x04...\x00/gs, '{markup28}'], 
-  [/\x0E\(\"\x08\x04Í\x04\x00N\x001\x00/gs, '{markup28}'],
-  [/\x0E\(\"\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}'],
-  [/\x0E\(\x00\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}' ],
-  [/\x0E\(\x02\x08\x04Í\x04\x00N\x001\x00/gs, '{markup28}'],
-  [/\x0E\(\x02\x06\x00Í\x02\x000\x00/gs, '{markup28}'],
-  [/\x0E\(\x02\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}'],
-  [/\x0E\(\x02\x08\x00Í\x04\x00µ0Ö0/gs, '{markup28}'],
-  [/\x0E\(\x02\x00\x04\x00\x00Í\x00\x00/gs, '{markup28}'],
-  [/\x0E\(\x01\x08\x04Í\x04\x00N\x001\x00/gs, '{markup28}'],
-  [/\x0E\(\x07\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}'],
-  [/\x0E\(\%\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}'],
-  [/\x0E\(\x1A\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}'],
-  [/\x0E\(\x0B\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}'],
-  [/\x0E\(\x15\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28}'],
-  [/\x0E\(\x02\x08\x00Í\x04\x00µ0Ö0/gs, '{markup28}'],
+  [/\x0E\(\x0d\x04\x00Í\x00\x00/gs, '{newpage}'], 
+  [/\x0E\(\"\x08\x04Í\x04\x00N\x001\x00/gs, '{markup28_34}'],
+  [/\x0E\(\"\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28_34}'],
+  [/\x0E\(\x00\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28_0}' ],
+  [/\x0E\(\x02\x06\x00Í\x02\x000\x00/gs, '{markup28_2}'],
+  [/\x0E\(\x02\x08\x00Í\x04\x00µ0Ö0/gs, '{markup28_2}'],
+  [/\x0E\(\x02\x08\x00Í\x04\x00µ0Ö0/gs, '{markup28_2}'],
+  [/\x0E\(\x02\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28_2}'],
+  [/\x0E\(\x02\x08\x04Í\x04\x00N\x001\x00/gs, '{markup28_2}'],
+  [/\x0E\(\x02\x00\x04\x00\x00Í\x00\x00/gs, '{markup28_2}'],
+  [/\x0E\(\x01\x08\x04Í\x04\x00N\x001\x00/gs, '{markup28_1}'],
+  [/\x0E\(\x07\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28_7}'],
+  [/\x0E\(\%\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28_37}'],
+  [/\x0E\(\x1A\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28_1a}'],
+  [/\x0E\(\x0B\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28_0b}'],
+  [/\x0E\(\x15\x08\x04Í\x04\x00N\x002\x00/gs, '{markup28_15}'],
+  [/\x0E\(.\x04...\x00/gs, '{markup28__4}'], 
 
   [/\x0E\n\x00\x02\x1E\x00/gs, '{newline}'],
   [/\x0E\n\x00\x02 \x00/gs, '{markup10_0}'],
@@ -288,20 +289,16 @@ const parseEntry = (entry, domain) => {
   }
 
   if (filtered.match(/\x0E/)) {
+    // console.log(name)
+    // console.log([unescapeHtmlEntities(original)])
     return null
   }
 
-  if (domain == 'TalkSNpc.sza.SP_sza_50_IslandEvaluation' && name == '003_04') {
-  // if (name == 'Fish_00329') {
+  if (domain == 'TalkNNpc.G1_Fu.Free.FU_FreeE_Event' && name == '017') {
     console.log(name)
     console.log([unescapeHtmlEntities(original)])
     console.log([filtered])
   }
-//  if (filtered.match(/\x0E/) ||
-//       filtered.match(/\x0F/)) {
-//     console.log(name)
-//     console.log([filtered])
-//   }
 
   return {
     name: name,
@@ -345,6 +342,7 @@ const enStringsDir = 'raw/acnh1.1msgen'
 const jaStringsDir = 'raw/acnh1.1msgjp'
 const enCode = 'USen'
 const jaCode = 'JPja'
+const jaScreenshotsDir = 'screenshots'
 const pairs = []
 
 const enToJaPath = (enPath) => {
@@ -392,6 +390,36 @@ const crawlPaths = (callback) => {
   })
 }
 
+const getScreenshots = (msgId, entries) => {
+  const screenshots = []
+
+  const singleFilename = `${msgId}.jpg`
+  const singleScreenshotPath = path.join(jaScreenshotsDir, singleFilename)
+  try {
+    let stat = fs.statSync(singleScreenshotPath)
+    if (stat && stat.isFile()) {
+      screenshots.push(singleFilename)
+    }
+  } catch (e) {
+  }
+
+  let num = 2
+  for (let num = 2; num < 6; num++) {
+    const filename = `${msgId}+${num}.jpg`
+    const screenshotPath = path.join(jaScreenshotsDir, filename)
+    try {
+      let stat = fs.statSync(screenshotPath)
+      if (stat && stat.isFile()) {
+        screenshots.push(filename)
+      }
+    } catch (e) {
+      break
+    }
+  }
+
+  return screenshots
+}
+
 crawlPaths((files) => {
   let tasks = []
 
@@ -406,13 +434,18 @@ crawlPaths((files) => {
         for (let enEntryKey of Object.keys(enEntries)) {
           if (jaEntries[enEntryKey]) {
             const msgId = `${filePair.domain}.${enEntryKey}`
-            msgPairs.push({
+            const screenshots = getScreenshots(msgId, jaEntries[enEntryKey])
+            const msgPair = {
               msgId: msgId,
               en: enEntries[enEntryKey].text,
               ja: jaEntries[enEntryKey].text,
               enMarkup: enEntries[enEntryKey].markup,
               jaMarkup: jaEntries[enEntryKey].markup
-            })
+            }
+            if (screenshots && screenshots.length > 0) {
+              msgPair.jaScreenshots = screenshots
+            }
+            msgPairs.push(msgPair)
           }
         }
         return msgPairs
@@ -448,7 +481,7 @@ crawlPaths((files) => {
           messageCount++
         }
       }
-      fs.writeFileSync('data/messages.json', JSON.stringify(allMessages))
+      fs.writeFileSync('data/messages.json', JSON.stringify(allMessages, null, 2))
       console.log(`Total messages ${messageCount} (duplicates: ${duplicateCount})`)
     })
 })

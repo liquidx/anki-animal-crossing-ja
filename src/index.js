@@ -5,6 +5,7 @@ const data = {
 
 const state = {
   selectedCategoryPath: '',
+  hasScreenshot: true,
   maxRows: 1000,
   categoryExclude: ['Tutorials'],
 }
@@ -34,11 +35,14 @@ const el = (tag, attributes, contents) => {
     element.setAttribute(attrKey, attributes[attrKey])
   }
   if (typeof contents == 'string') {
-    let textNode = document.createTextNode(contents)
+    let textNode = document.createElement('div')
+    textNode.innerHTML = contents
     element.appendChild(textNode)
   } else if (typeof contents == 'object' && contents.length) {
     for (let child of contents) {
-      element.appendChild(child)
+      if (child) {
+        element.appendChild(child)
+      }
     }
   }
   return element
@@ -46,11 +50,27 @@ const el = (tag, attributes, contents) => {
 
 const td = (attributes, contents) => el('td', attributes, contents)
 const tr = (attributes, contents) => el('tr', attributes, contents)
+const div = (attributes, contents) => el('div', attributes, contents)
+const img = (attributes, contents) => el('img', attributes, contents)
 
 const renderMessageRow = (message) => {
+  let screenshots = []
+  if (message.jaScreenshots) {
+    for (let screenshot of message.jaScreenshots) {
+      screenshots.push(img({'src': `screenshots/${screenshot}`, width: '240'}))
+    }
+  }
+
   const row = tr({className: 'message'}, [
-    td({className: 'en'}, message.en),
-    td({className: 'ja'}, message.ja),
+    td({className: 'en'}, [
+      div({className: 'text'}, message.en),
+      div({className: 'markup'}, message.enMarkup)
+    ]),
+    td({className: 'ja'}, [
+      div({className: 'text'}, message.ja), 
+      div({className: 'markup'}, message.jaMarkup), 
+      div({className: 'screenshots'}, screenshots)
+    ]),
     td({className: 'id'}, message.msgId)
   ])
   return row
@@ -61,9 +81,22 @@ const renderTable = () => {
   const tbody = table.querySelector('tbody')
   tbody.innerHTML = ''
 
+  let pattern = null
+  if (state.searchTerm && state.searchTerm.length > 0) {
+    pattern = new RegExp(state.searchTerm, 'gi')
+  }
+
   let count = 0
   for (let message of data.messages) {
     if (state.selectedCategoryPath.length > 0 && !message.msgId.startsWith(state.selectedCategoryPath)) {
+      continue
+    }
+    if (pattern) {
+      if (!message.en.match(pattern) && !message.ja.match(pattern) && !message.msgId.match(pattern)) {
+        continue
+      }
+    }
+    if (state.hasScreenshot && !message.jaScreenshots) {
       continue
     }
     tbody.appendChild(renderMessageRow(message))
@@ -77,7 +110,7 @@ const renderTable = () => {
 const createCategorySelector = (categories, parent) => {
   const categorySelector = el('select', {})
   categorySelector.dataset.parentPath = parent
-  categorySelector.appendChild(el('option', {value: '*'}, '*'))
+  categorySelector.appendChild(el('option', {value: ''}, '*'))
   for (let category of Object.keys(categories)) {
     categorySelector.appendChild(el('option', {value: category}, category))
   }
@@ -96,7 +129,6 @@ const createCategorySelector = (categories, parent) => {
     let categorySelectors = e.target.parentElement
     let removableSelectors = []
     for (let child of categorySelectors.children) {
-      console.log(child.dataset.parentPath, child)
       if (child.dataset.parentPath && !categoryPath.startsWith(child.dataset.parentPath)) {
         removableSelectors.push(child)
       }
@@ -138,6 +170,21 @@ const extractCategories = (messages) => {
   return categories
 }
 
+const filterByTerm = (term) => {
+  state.searchTerm = term.trim()
+  renderTable()
+}
+
+const initSearch = () => {
+  const searchBox = document.querySelector('#search')
+  searchBox.addEventListener('keyup', (e) => {
+    if (e.keyCode == 13) {  // enter 
+      filterByTerm(e.target.value)
+      //e.target.blur()
+    }
+  })
+}
+
 const processMessages = (messages) => {
   let processed = []
 
@@ -164,4 +211,5 @@ const main = () => {
 
 window.addEventListener('DOMContentLoaded', () => {
   main()
+  initSearch()
 })
