@@ -8,7 +8,7 @@ const csv = require('@fast-csv/format');
 
 const REMOVE_MARKUP = true
 
-const markup = [
+const CONVERSION_RULES = [
   [/\x0En\x01\x00/gs, '{name}'],
   [/\x0En\x00\x00/gs, '...'],
   [/\x0En[^\x01\x02]\x00/gs, '{name}'],
@@ -276,7 +276,10 @@ const parseEntry = (entry, domain) => {
 
   let filtered = unescapeHtmlEntities(original)
   filtered = removeFuriganaMarkup(filtered)
-  for (let conversion of markup) {
+  let textWithMarkup = '' + filtered
+  for (let conversion of CONVERSION_RULES) {
+    textWithMarkup = textWithMarkup.replace(conversion[0], conversion[1])
+
     if (REMOVE_MARKUP && conversion[1].startsWith('{markup')) {
       filtered = filtered.replace(conversion[0], '')
     } else {
@@ -302,7 +305,8 @@ const parseEntry = (entry, domain) => {
 
   return {
     name: name,
-    text: filtered
+    text: filtered,
+    markup: textWithMarkup
   }
 }
 
@@ -325,7 +329,10 @@ const parseFile = async (filename, domain) => {
         for (let entry of result.kup.entries[0].entry) {
           const parsedEntry = parseEntry(entry, domain)
           if (parsedEntry) {
-            entries[parsedEntry.name] = parsedEntry.text
+            entries[parsedEntry.name] = { 
+              text: parsedEntry.text,
+              markup: parsedEntry.markup
+            }
           }
         }
         resolve(entries)
@@ -334,8 +341,8 @@ const parseFile = async (filename, domain) => {
   })
 }
 
-const enStringsDir = 'acnh1.1msgen'
-const jaStringsDir = 'acnh1.1msgjp'
+const enStringsDir = 'raw/acnh1.1msgen'
+const jaStringsDir = 'raw/acnh1.1msgjp'
 const enCode = 'USen'
 const jaCode = 'JPja'
 const pairs = []
@@ -401,8 +408,10 @@ crawlPaths((files) => {
             const msgId = `${filePair.domain}.${enEntryKey}`
             msgPairs.push({
               msgId: msgId,
-              en: enEntries[enEntryKey],
-              ja: jaEntries[enEntryKey]
+              en: enEntries[enEntryKey].text,
+              ja: jaEntries[enEntryKey].text,
+              enMarkup: enEntries[enEntryKey].markup,
+              jaMarkup: jaEntries[enEntryKey].markup
             })
           }
         }
@@ -414,13 +423,14 @@ crawlPaths((files) => {
   Promise.all(tasks)
     .then(messagesList => {
       const stream = csv.format({ headers: true })
-      const ws = fs.createWriteStream('output.csv')
+      const ws = fs.createWriteStream('data/messages.csv')
       stream.pipe(ws)
 
       let seenEn = new Set()
       let seenJa = new Set()
       let duplicateCount = 0
       let messageCount = 0
+      let allMessages = []
       for (let messages of messagesList) {
         for (let message of messages) {
           if (seenEn.has(message.en)) {
@@ -433,10 +443,12 @@ crawlPaths((files) => {
           }
           seenEn.add(message.en)
           seenJa.add(message.ja)
+          allMessages.push(message)
           stream.write(message)
           messageCount++
         }
       }
+      fs.writeFileSync('data/messages.json', JSON.stringify(allMessages))
       console.log(`Total messages ${messageCount} (duplicates: ${duplicateCount})`)
     })
 })
