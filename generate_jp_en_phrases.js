@@ -427,18 +427,21 @@ crawlPaths((files) => {
     let parseTask = Promise.all([parseFile(filePair.en, filePair.domain), parseFile(filePair.ja, filePair.domain)])
       .then((enJaEntries) => {
         let msgPairs = []
-        enEntries = enJaEntries[0]
-        jaEntries = enJaEntries[1]
+        let enEntries = enJaEntries[0]
+        let jaEntries = enJaEntries[1]
 
         // Match entries
         for (let enEntryKey of Object.keys(enEntries)) {
           if (jaEntries[enEntryKey]) {
             const msgId = `${filePair.domain}.${enEntryKey}`
             const screenshots = getScreenshots(msgId, jaEntries[enEntryKey])
+            const enMessages = enEntries[enEntryKey].text.split('{newpage}').filter(e => { return !!e })
+            const jaMessages = jaEntries[enEntryKey].text.split('{newpage}').filter(e => { return !!e })
+
             const msgPair = {
               msgId: msgId,
-              en: enEntries[enEntryKey].text,
-              ja: jaEntries[enEntryKey].text,
+              en: enMessages,
+              ja: jaMessages,
               enMarkup: enEntries[enEntryKey].markup,
               jaMarkup: jaEntries[enEntryKey].markup
             }
@@ -466,16 +469,16 @@ crawlPaths((files) => {
       let allMessages = []
       for (let messages of messagesList) {
         for (let message of messages) {
-          if (seenEn.has(message.en)) {
+          if (seenEn.has(message.enMarkup)) {
             duplicateCount++
             continue
           }
-          if (seenJa.has(message.ja)) {
+          if (seenJa.has(message.jaMarkup)) {
             duplicateCount++
             continue
           }
-          seenEn.add(message.en)
-          seenJa.add(message.ja)
+          seenEn.add(message.enMarkup)
+          seenJa.add(message.jaMarkup)
           allMessages.push(message)
           stream.write(message)
           messageCount++

@@ -53,7 +53,7 @@ const tr = (attributes, contents) => el('tr', attributes, contents)
 const div = (attributes, contents) => el('div', attributes, contents)
 const img = (attributes, contents) => el('img', attributes, contents)
 
-const renderMessageRow = (message) => {
+const renderMessageRows = (message) => {
   let screenshots = []
   if (message.jaScreenshots) {
     for (let screenshot of message.jaScreenshots) {
@@ -61,19 +61,33 @@ const renderMessageRow = (message) => {
     }
   }
 
+  let jaTextElements = []
+  for (let text of message.ja) {
+    if (text && text.length > 0) {
+      jaTextElements.push( div({className: 'text'}, text))
+    }
+  }
+
+  let enTextElements = []
+  for (let text of message.en) {
+    if (text && text.length > 0) {
+      enTextElements.push( div({className: 'text'}, text))
+    }
+  }
+
   const row = tr({className: 'message'}, [
     td({className: 'en'}, [
-      div({className: 'text'}, message.en),
+      div({className: 'texts'}, enTextElements),
       div({className: 'markup'}, message.enMarkup)
     ]),
     td({className: 'ja'}, [
-      div({className: 'text'}, message.ja), 
-      div({className: 'markup'}, message.jaMarkup), 
+      div({className: 'texts'}, jaTextElements), 
+      //div({className: 'markup'}, message.jaMarkup), 
       div({className: 'screenshots'}, screenshots)
     ]),
     td({className: 'id'}, message.msgId)
   ])
-  return row
+  return [row]
 }
 
 const renderTable = () => {
@@ -99,7 +113,9 @@ const renderTable = () => {
     if (state.hasScreenshot && !message.jaScreenshots) {
       continue
     }
-    tbody.appendChild(renderMessageRow(message))
+    for (let row of renderMessageRows(message)) {
+      tbody.appendChild(row)
+    }
     count++;
     if (count > state.maxRows) {
       break
