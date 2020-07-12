@@ -5,7 +5,7 @@ const data = {
 
 const state = {
   selectedCategoryPath: '',
-  hasScreenshot: true,
+  hasScreenshot: false,
   maxRows: 1000,
   categoryExclude: ['Tutorials'],
 }
