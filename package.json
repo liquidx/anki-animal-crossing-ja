@@ -1,10 +1,49 @@
 {
   "name": "anki-animal-crossing-jp",
   "version": "1.0.0",
-  "description": "",
+  "main": "server.js",
+  "engines": {
+    "node": "10.x"
+  },
+  "scripts": {
+    "build": "npx webpack --config webpack.dev.js",
+    "build-prod": "npx webpack --config webpack.prod.js",
+    "watch": "npx webpack --watch --config webpack.dev.js",
+    "start": "node server.js",
+    "start-webpack": "node server.webpack.js",
+    "deploy-gcloud": "npx webpack --config webpack.prod.js && gcloud app deploy --promote -q --project liquidx-new-web-project",
+    "deploy-firebase": "npx webpack --config webpack.prod.js && firebase deploy",
+    "deploy-now": "now deploy public --local-config ./now.json --prod",
+    "logs-gcloud": "gcloud app logs tail -s default --project liquidx-new-web-project",
+    "deploy-gcs": "gsutil -m cp -r gcloud-storage gs://liquidx-new-web-project.a.appspot.com/"
+  },
   "dependencies": {
+    "@babel/core": "^7.7.7",
+    "@google-cloud/storage": "^4.2.0",
+    "express": "^4.17.1",
+    "firebase": "^7.6.1",
+    "lodash": "^4.17.11",
+    "normalize.css": "^8.0.1",
     "fast-csv": "^4.3.1",
     "walk": "^2.3.14",
     "xml2js": "^0.4.23"
+  },
+  "devDependencies": {
+    "babel-loader": "^8.0.5",
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^3.4.1",
+    "eslint": "^6.8.0",
+    "file-loader": "^5.0.2",
+    "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.9.0",
+    "node-sass": "^4.13.0",
+    "postcss-loader": "^3.0.0",
+    "sass-loader": "^8.0.0",
+    "style-loader": "^1.1.2",
+    "terser-webpack-plugin": "^2.3.1",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.8",
+    "webpack-dev-middleware": "^3.7.1",
+    "webpack-merge": "^4.2.2"
   }
 }

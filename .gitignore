@@ -1,2 +1,6 @@
-acnh1.*/
-node_modules/
+acnh1.*
+
+node_modules
+public/*
+firebase-debug.log
+.firebase/*

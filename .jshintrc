@@ -1,0 +1,17 @@
+{
+  "undef": true,
+  "unused": true,
+  "esversion": 8,
+  "asi": true,
+  "browser": true,
+  "node": true,
+  "globals": {
+    "window": true,
+    "document": true,
+    "module": true,
+    "console": true,
+    "require": true,
+    "URLSearchParams": true
+  }
+}
+
