@@ -6,8 +6,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  mode: 'development',  
-  entry: { 
+  mode: 'development',
+  entry: {
     index: ['./src/index.js', './src/index.scss']
   },
   output: {
@@ -31,16 +31,16 @@ module.exports = {
       filename: '[name].css'
     }),
     new CopyPlugin({
-      patterns: [{from: "data/**", to: ".", flatten: false }]
+      patterns: [{ from: "data/**", to: "." }]
     }),
     new CopyPlugin({
-      patterns: [{from: "screenshots/**", to: ".", flatten: false }]
+      patterns: [{ from: "screenshots/**", to: "." }]
     }),
   ],
   module: {
-    rules:[
+    rules: [
       {
-        test:  /\.(png|svg|jpg|gif)$/,
+        test: /\.(png|svg|jpg|gif)$/,
         use: [
           'file-loader'
         ]
@@ -49,11 +49,11 @@ module.exports = {
         test: /\.scss$/,
         use: [
           { loader: MiniCssExtractPlugin.loader },
-          { loader: 'css-loader'},
-          { loader: 'postcss-loader'},
+          { loader: 'css-loader' },
+          { loader: 'postcss-loader' },
           {
             loader: 'sass-loader',
-            options: {implementation: require('node-sass')}
+            options: { implementation: require('sass') }
           }
         ]
       }

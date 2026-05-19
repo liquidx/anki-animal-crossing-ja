@@ -1,0 +1,7 @@
+allowBuilds:
+  '@firebase/util': true
+  '@parcel/watcher': true
+  core-js: set this to true or false
+  fsevents: set this to true or false
+  node-sass: true
+  protobufjs: true
